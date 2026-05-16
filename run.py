@@ -20,17 +20,18 @@ def run_pipeline():
     recipient = os.environ.get("GMAIL_ADDRESS")
 
     logger.info("📰 뉴스 수집 시작...")
-    tc_articles = fetch_techcrunch(3)
-    hn_articles = fetch_hackernews(3)
+    tc_articles = fetch_techcrunch(5)
+    hn_articles = fetch_hackernews(5)
     logger.info(f"✅ TechCrunch: {len(tc_articles)}건, Hacker News: {len(hn_articles)}건")
 
     logger.info("🤖 AI 요약 중...")
     tc_summary_text = summarize_articles(tc_articles, "TechCrunch")
+    time.sleep(5)
     hn_summary_text = summarize_articles(hn_articles, "Hacker News")
 
     email_articles = [{
-        'source': '📊 오늘의 트렌드',
-        'title': 'AI가 분석한 주요 트렌드',
+        'source': '📊 Today\'s Trends',
+        'title': 'Key AI-Analyzed Trends',
         'url': '#',
         'summary': f"{tc_summary_text}\n\n{hn_summary_text}"
     }]

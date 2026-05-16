@@ -220,3 +220,4 @@ __marimo__/
 /main/credentials.json
 /Secrets
 /main/token.json
+/main/get_token.py
