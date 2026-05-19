@@ -2,6 +2,17 @@ import time
 from google import genai
 from .news_fetcher import fetch_techcrunch, fetch_hackernews
 
+_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+]
+
+
+def _is_quota_error(e: Exception) -> bool:
+    return "429" in str(e) or "quota" in str(e).lower()
+
 
 def summarize_articles(articles, source_name):
     articles_text = "\n\n".join([
@@ -34,11 +45,22 @@ def summarize_articles(articles, source_name):
 """
 
     client = genai.Client()
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
-    )
+    last_error = None
 
-    return response.text
+    for model in _MODELS:
+        try:
+            response = client.models.generate_content(
+                model=model, contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            if _is_quota_error(e):
+                print(f"[summarizer] Quota exceeded for {model}, switching to next model...")
+                last_error = e
+                continue
+            raise
+
+    raise RuntimeError(f"All models exceeded quota. Last error: {last_error}")
 
 
 if __name__ == "__main__":
